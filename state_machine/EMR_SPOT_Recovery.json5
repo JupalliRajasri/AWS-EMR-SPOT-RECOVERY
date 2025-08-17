@@ -1,0 +1,677 @@
+{
+  "StartAt": "Create_EMR_Cluster",
+  "States": {
+    "Create_EMR_Cluster": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:createCluster.sync",
+      "Parameters": {
+        "Name": "SPOT_FAILURE_CLUSTER",
+        "VisibleToAllUsers": true,
+        "ReleaseLabel": "emr-7.8.0",
+        "StepConcurrencyLevel": 40,
+        "Applications": [
+          {
+            "Name": "Spark"
+          }
+        ],
+        "Configurations": [
+          {
+            "Classification": "spark",
+            "Properties": {
+              "maximizeResourceAllocation": "true"
+            }
+          }
+        ],
+        "ServiceRole": "EMR_DefaultRole",
+        "JobFlowRole": "EMR_EC2_DefaultRole",
+        "LogUri": "s3://sr-spot-csi/logs",
+        "Instances": {
+          "Ec2SubnetId": "subnet-03ea0b015f6f13430",
+          "KeepJobFlowAliveWhenNoSteps": true,
+          "InstanceFleets": [
+            {
+              "InstanceFleetType": "MASTER",
+              "LaunchSpecifications": {
+                "SpotSpecification": {
+                  "TimeoutAction": "TERMINATE_CLUSTER",
+                  "TimeoutDurationMinutes": 8
+                }
+              },
+              "TargetSpotCapacity": 1,
+              "InstanceTypeConfigs": [
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m6g.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5a.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5d.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m4.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5.xlarge"
+                }
+              ]
+            },
+            {
+              "InstanceFleetType": "CORE",
+              "LaunchSpecifications": {
+                "SpotSpecification": {
+                  "TimeoutAction": "TERMINATE_CLUSTER",
+                  "TimeoutDurationMinutes": 8
+                }
+              },
+              "TargetSpotCapacity": 4,
+              "InstanceTypeConfigs": [
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m6g.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5a.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5d.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m4.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 70,
+                  "InstanceType": "m5.xlarge"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "ResultPath": "$.CreateClusterResult",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Next": "Capture_Parameter_Details",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "Capture_Cluster_Details"
+    },
+    "Capture_Parameter_Details": {
+      "Type": "Pass",
+      "Parameters": {
+        "ArgsAdhocStep1": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsAdhocStep2": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsAdhocStep3": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsSRRAGEmail": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "Choice_Step.$": "$.Choice_Step",
+        "CLUSTER_NAME": "SPOT_FAILURE_CLUSTER",
+        "EMR_VERSION": "emr-7.8.0",
+        "MASTER_INSTANCE1": "m5.xlarge",
+        "MASTER_INSTANCE2": "m5a.xlarge",
+        "MASTER_INSTANCE3": "m5d.xlarge",
+        "MASTER_INSTANCE4": "m4.xlarge",
+        "MASTER_INSTANCE5": "m6g.xlarge",
+        "CORE_INSTANCE1": "m5.xlarge",
+        "CORE_INSTANCE2": "m5a.xlarge",
+        "CORE_INSTANCE3": "m5d.xlarge",
+        "CORE_INSTANCE4": "m4.xlarge",
+        "CORE_INSTANCE5": "m6g.xlarge",
+        "Ec2SubnetId": "subnet-03ea0b015f6f13430",
+        "LogUri": "s3://sr-spot-csi/logs",
+        "StepConcurrencyLevel": 60,
+        "ServiceRole": "EMR_DefaultRole",
+        "JobFlowRole": "EMR_EC2_DefaultRole",
+        "Master_TimeoutDurationMinutes": 15,
+        "MASTER_INSTANCE_COUNT": 1,
+        "BidPriceAsPercentageOfOnDemandPrice_Master_2": 90,
+        "BidPriceAsPercentageOfOnDemandPrice_Core_2": 90,
+        "Core_TimeoutDurationMinutes": 15,
+        "CORE_INSTANCE_COUNT": 4
+      },
+      "Next": "Create_Increase_Bid_Spot_EMR_Cluster"
+    },
+    "Create_Increase_Bid_Spot_EMR_Cluster": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:createCluster.sync",
+      "Parameters": {
+        "Name": "SPOT_FAILURE_CLUSTER",
+        "VisibleToAllUsers": true,
+        "ReleaseLabel": "emr-7.8.0",
+        "StepConcurrencyLevel": 60,
+        "Applications": [
+          {
+            "Name": "Spark"
+          }
+        ],
+        "Configurations": [
+          {
+            "Classification": "spark",
+            "Properties": {
+              "maximizeResourceAllocation": "true"
+            }
+          }
+        ],
+        "ServiceRole": "EMR_DefaultRole",
+        "JobFlowRole": "EMR_EC2_DefaultRole",
+        "LogUri": "s3://sr-spot-csi/logs",
+        "Instances": {
+          "Ec2SubnetId": "subnet-03ea0b015f6f13430",
+          "KeepJobFlowAliveWhenNoSteps": true,
+          "InstanceFleets": [
+            {
+              "InstanceFleetType": "MASTER",
+              "LaunchSpecifications": {
+                "SpotSpecification": {
+                  "TimeoutAction": "SWITCH_TO_ON_DEMAND",
+                  "TimeoutDurationMinutes": 15
+                }
+              },
+              "TargetSpotCapacity": 1,
+              "InstanceTypeConfigs": [
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m6g.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5a.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5d.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m4.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5.xlarge"
+                }
+              ]
+            },
+            {
+              "InstanceFleetType": "CORE",
+              "LaunchSpecifications": {
+                "SpotSpecification": {
+                  "TimeoutAction": "SWITCH_TO_ON_DEMAND",
+                  "TimeoutDurationMinutes": 15
+                }
+              },
+              "TargetSpotCapacity": 4,
+              "InstanceTypeConfigs": [
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m6g.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5a.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5d.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m4.xlarge"
+                },
+                {
+                  "BidPriceAsPercentageOfOnDemandPrice": 90,
+                  "InstanceType": "m5.xlarge"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "ResultPath": "$.CreateClusterResult",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Next": "Terminate_Cluster",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "Capture_Cluster_Details"
+    },
+    "Capture_Cluster_Details": {
+      "Type": "Pass",
+      "Parameters": {
+        "ClusterId.$": "$.CreateClusterResult.ClusterId",
+        "ArgsAdhocStep1": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsAdhocStep2": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsAdhocStep3": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "ArgsSRRAGEmail": [
+          "spark-submit",
+          "--deploy-mode",
+          "cluster",
+          "--master",
+          "yarn",
+          "--conf",
+          "spark.yarn.submit.waitAppCompletion=true",
+          "--num-executors",
+          "1",
+          "--executor-cores",
+          "1",
+          "--executor-memory",
+          "2g",
+          "s3://sr-spot-csi/code/placeholder_script.py"
+        ],
+        "Choice_Step.$": "$.Choice_Step"
+      },
+      "Next": "Enable_Termination_Protection"
+    },
+    "Enable_Termination_Protection": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:setClusterTerminationProtection",
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "TerminationProtected": true
+      },
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Next": "Terminate_Cluster",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "StepChoice"
+    },
+    "StepChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Choice_Step",
+          "StringEquals": "Dummy1",
+          "Next": "Dummy1"
+        },
+        {
+          "Variable": "$.Choice_Step",
+          "StringEquals": "Dummy2",
+          "Next": "Dummy2"
+        },
+        {
+          "Variable": "$.Choice_Step",
+          "StringEquals": "Dummy3",
+          "Next": "Dummy3"
+        },
+        {
+          "Variable": "$.Choice_Step",
+          "StringEquals": "SRRAGEmail",
+          "Next": "SRRAGEmail"
+        }
+      ],
+      "Default": "Dummy1"
+    },
+    "Dummy1": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:addStep.sync",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2
+        }
+      ],
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "Step": {
+          "Name": "Dummy1",
+          "ActionOnFailure": "CONTINUE",
+          "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args.$": "$.ArgsAdhocStep1"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "ResultPath": "$.Cause",
+          "Next": "Fail_Handler_Dummy1"
+        }
+      ],
+      "Next": "Dummy2"
+    },
+    "Fail_Handler_Dummy1": {
+      "Type": "Pass",
+      "Parameters": {
+        "StepName": "Dummy1",
+        "Cause.$": "$.Cause",
+        "ClusterId.$": "$.ClusterId",
+        "ArgsSRRAGEmail.$": "$.ArgsSRRAGEmail"
+      },
+      "Next": "Capture_Failed_Step"
+    },
+    "Fail_Handler_Dummy2": {
+      "Type": "Pass",
+      "Parameters": {
+        "StepName": "Dummy2",
+        "Cause.$": "$.Cause",
+        "ClusterId.$": "$.ClusterId",
+        "ArgsSRRAGEmail.$": "$.ArgsSRRAGEmail"
+      },
+      "Next": "Capture_Failed_Step"
+    },
+    "Fail_Handler_Dummy3": {
+      "Type": "Pass",
+      "Parameters": {
+        "StepName": "Dummy3",
+        "Cause.$": "$.Cause",
+        "ClusterId.$": "$.ClusterId",
+        "ArgsSRRAGEmail.$": "$.ArgsSRRAGEmail"
+      },
+      "Next": "Capture_Failed_Step"
+    },
+    "Dummy2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:addStep.sync",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2
+        }
+      ],
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "Step": {
+          "Name": "Dummy2",
+          "ActionOnFailure": "CONTINUE",
+          "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args.$": "$.ArgsAdhocStep2"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "ResultPath": "$.Cause",
+          "Next": "Fail_Handler_Dummy2"
+        }
+      ],
+      "Next": "Dummy3"
+    },
+    "Dummy3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:addStep.sync",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2
+        }
+      ],
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "Step": {
+          "Name": "Dummy3",
+          "ActionOnFailure": "CONTINUE",
+          "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args.$": "$.ArgsAdhocStep3"
+          }
+        }
+      },
+      "ResultPath": null,
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "ResultPath": "$.Cause",
+          "Next": "Fail_Handler_Dummy3"
+        }
+      ],
+      "Next": "SRRAGEmail"
+    },
+    "SRRAGEmail": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:addStep.sync",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "IntervalSeconds": 30,
+          "MaxAttempts": 2
+        }
+      ],
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "Step": {
+          "Name": "SRRAGEmail",
+          "ActionOnFailure": "CONTINUE",
+          "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args.$": "$.ArgsSRRAGEmail"
+          }
+        }
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "Next": "Disable_Termination_Protection",
+          "ResultPath": "$.error"
+        }
+      ],
+      "ResultPath": null,
+      "Next": "Disable_Termination_Protection"
+    },
+    "Capture_Failed_Step": {
+      "Type": "Pass",
+      "Parameters": {
+        "Choice_Step.$": "$.StepName",
+        "Cause.$": "$.Cause",
+        "ClusterId.$": "$.ClusterId",
+        "ArgsSRRAGEmail.$": "$.ArgsSRRAGEmail"
+      },
+      "Next": "Check_Cause_Message"
+    },
+    "Check_Cause_Message": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Cause.Cause",
+          "StringMatches": "*Master node was terminated*",
+          "Next": "Disable_Termination_Protection2"
+        },
+        {
+          "Variable": "$.Cause.Cause",
+          "StringMatches": "*EMR.AmazonElasticMapReduceException*",
+          "Next": "Disable_Termination_Protection2"
+        }
+      ],
+      "Default": "SRRAGEmail"
+    },
+    "Disable_Termination_Protection2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:setClusterTerminationProtection",
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "TerminationProtected": false
+      },
+      "ResultPath": null,
+      "Next": "Wait_Another_10_Seconds2"
+    },
+    "Wait_Another_10_Seconds2": {
+      "Type": "Wait",
+      "Seconds": 100,
+      "Next": "Terminate_Cluster2"
+    },
+    "Terminate_Cluster2": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:terminateCluster",
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId"
+      },
+      "ResultPath": null,
+      "Next": "Create_EMR_Cluster"
+    },
+    "Disable_Termination_Protection": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:setClusterTerminationProtection",
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId",
+        "TerminationProtected": false
+      },
+      "ResultPath": null,
+      "Next": "Wait_Another_10_Seconds"
+    },
+    "Wait_Another_10_Seconds": {
+      "Type": "Wait",
+      "Seconds": 100,
+      "Next": "Terminate_Cluster"
+    },
+    "Terminate_Cluster": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::elasticmapreduce:terminateCluster",
+      "Parameters": {
+        "ClusterId.$": "$.ClusterId"
+      },
+      "Next": "End_StateMachine_Flow"
+    },
+    "End_StateMachine_Flow": {
+      "Type": "Pass",
+      "End": true
+    }
+  }
+}
