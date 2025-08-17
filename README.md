@@ -1,4 +1,5 @@
 **AWS EMR Spot Recovery Workflow with Smart Retries**
+
 🌟 **Overview**
 
 This project implements a cost-optimized, fault-tolerant EMR workflow using AWS Step Functions, EMR, Lambda, and Spot Instances.
